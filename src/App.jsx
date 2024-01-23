@@ -4,7 +4,7 @@ import { PrimeReactProvider } from 'primereact/api';
 import Ways from "./routes";
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
-import '../public/digital.css';
+import '../public/digital.css'
 import { QueryClientProvider } from "react-query";
 import { queryClient } from "./service";
 

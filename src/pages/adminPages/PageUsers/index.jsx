@@ -2,16 +2,71 @@ import { Button } from 'primereact/button';
 import { Sidebar } from 'primereact/sidebar';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { InputText } from 'primereact/inputtext'
-import { useGetUsers } from '../../../hooks/useUsers';
+import { useCreateUsers, useDeleteUser, useGetUsers } from '../../../hooks/useUsers';
+import { useForm } from 'react-hook-form';
+import { Toast } from 'primereact/toast';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 const PageUsers = () => {
     const [visibleCreate, setVisibleCreate] = useState(false);
-    const [isVisible, setIsVisible] = useState(false)
+    const [isVisible, setIsVisible] = useState(false);
     const { register: createRegister, handleSubmit: createHandleSubmit } = useForm();
     const { data: usuarios, isLoading } = useGetUsers();
+    const { mutateAsync: deletarUsuario } = useDeleteUser();
+    const { mutateAsync: criarUsuario } = useCreateUsers();
+    const accept = (user_id) => {
+        confirmDialog({
+            header: "Aviso",
+            message: 'Tem certeza que deseja deletar este item?',
+            acceptLabel: 'Sim',
+            rejectLabel: 'Não',
+            accept: () => {
+                deletarUsuario(user_id, {
+                    onSuccess: () => {
+                        toast.current.show({
+                            severity: 'sucess',
+                            summary: 'Aviso:',
+                            detail: 'Usuario deletado com sucesso!',
+                            life: 3000
+                        });
+                    },
+                    onError: () => {
+                        toast.current.show({
+                            severity: 'error',
+                            summary: 'Aviso:',
+                            detail: 'Erro ao deletar usuario!',
+                            life: 3000
+                        });
+                    }
+                })
+            }
+        })
+    }
+    const toast = useRef(null);
+
     const createUser = (data) => {
-        console.log(data);
+        criarUsuario(data, {
+            onSuccess: () => {
+                setVisibleCreate(false);
+                toast.current.show({
+                    severity: 'info',
+                    summary: 'sucess',
+                    detail: 'Usuario criado com sucesso!',
+                    life: 3000
+                });
+            },
+            onError: () => {
+                setVisibleCreate(false);
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'sucess',
+                    detail: 'Usuario criado com sucesso!',
+                    life: 3000
+                });
+            }
+        });
+
     }
     return (
         <>
@@ -24,10 +79,10 @@ const PageUsers = () => {
                 <Column field="user_id" header="ID" className='mb-3 w-1'></Column>
                 <Column field="user_name" header="Nome"></Column>
                 <Column field="user_email" header="Email"></Column>
-                <Column header={'Ações'} bodyClassName={'w-1'} body={() => (
+                <Column header={'Ações'} bodyClassName={'w-1'} body={(rowData) => (
                     <div className='flex gap-3'>
                         <Button rounded icon={'pi pi-pencil'} />
-                        <Button rounded icon={'pi pi-trash'} />
+                        <Button rounded icon={'pi pi-trash'} onClick={() => accept(rowData.user_id)} />
                     </div>
                 )} />
             </DataTable>
@@ -65,12 +120,14 @@ const PageUsers = () => {
                         className='w-full' />
                 </form>
             </Sidebar>
-            {/* <Sidebar
+            <ConfirmDialog />
+            <Sidebar
                 visible={visibleCreate}
                 onHide={() => setVisibleCreate(false)}
                 position={'right'}>
                 alguma coisa edit
-            </Sidebar> */}
+            </Sidebar>
+            <Toast ref={toast} position={'top-center'} />
         </>
     )
 }
