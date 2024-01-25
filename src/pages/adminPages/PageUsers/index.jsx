@@ -12,6 +12,7 @@ const PageUsers = () => {
     const [visibleCreate, setVisibleCreate] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const { register: createRegister, handleSubmit: createHandleSubmit } = useForm();
+    const { register: updateRegister, handleSubmit: updateHandleSubmit, setValue: updateValue } = useForm();
     const { data: usuarios, isLoading } = useGetUsers();
     const { mutateAsync: deletarUsuario } = useDeleteUser();
     const { mutateAsync: criarUsuario } = useCreateUsers();
@@ -68,6 +69,10 @@ const PageUsers = () => {
         });
 
     }
+
+    const updateUser = (data) => {
+
+    }
     return (
         <>
             <div className={'flex justify-content-between mb-4'}>
@@ -81,7 +86,12 @@ const PageUsers = () => {
                 <Column field="user_email" header="Email"></Column>
                 <Column header={'Ações'} bodyClassName={'w-1'} body={(rowData) => (
                     <div className='flex gap-3'>
-                        <Button rounded icon={'pi pi-pencil'} />
+                        <Button rounded icon={'pi pi-pencil'}
+                            onClick={() => {
+                                setIsVisible(true);
+                                updateValue('user_name', rowData.user_name);
+                                updateValue('user_email', rowData.user_email);
+                            }} />
                         <Button rounded icon={'pi pi-trash'} onClick={() => accept(rowData.user_id)} />
                     </div>
                 )} />
@@ -122,10 +132,39 @@ const PageUsers = () => {
             </Sidebar>
             <ConfirmDialog />
             <Sidebar
-                visible={visibleCreate}
-                onHide={() => setVisibleCreate(false)}
+                visible={isVisible}
+                onHide={() => setIsVisible(false)}
                 position={'right'}>
-                alguma coisa edit
+                <form
+                    onSubmit={updateHandleSubmit(updateUser())}
+                >
+                    <label htmlFor="">Nome</label>
+                    <InputText
+                        id='nome'
+                        className='mb-3 w-full'
+                        placeholder='Digite seu nome'
+                        {...updateRegister('user_name', { required: true })}>
+                    </InputText>
+                    <label htmlFor="">E-mail</label>
+                    <InputText
+                        id='Email'
+                        className='mb-3 w-full'
+                        placeholder='Digite seu E-mail'
+                        {...updateRegister('user_email', { required: true })}>
+                    </InputText>
+                    <label htmlFor="">Senha</label>
+                    <InputText
+                        id='senha'
+                        type='password'
+                        className='mb-3 w-full'
+                        placeholder='*******'
+                        {...updateRegister('user_password')}
+                    >
+                    </InputText>
+                    <Button label='Criar'
+                        type='submit'
+                        className='w-full' />
+                </form>
             </Sidebar>
             <Toast ref={toast} position={'top-center'} />
         </>

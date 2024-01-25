@@ -22,11 +22,17 @@ export const useCreateUsers = () => {
 
 export const useDeleteUser = () => {
   return useMutation(async (id) => {
-    const response = await API.delete('users', id)
+    const response = await API.delete(`users/${id}`);
     return response.data;
   }, {
     onSuccess: () => {
       queryClient.invalidateQueries('get-users');
     }
+  });
+};
+
+export const useUpdateUser = () => {
+  return useMutation(async (dados) => {
+    const response = await API.post(`users/${dados.user_id}`, dados);
   });
 };
